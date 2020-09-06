@@ -10,8 +10,8 @@ const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'HS256', 'HS384', 'HS512'];
 const handleVerify = (err, decoded) => {
     logger.info(`handling verify`);
     if (err){
-        logger.error(err.mess);
-        throw Error(err);
+        logger.error(err.message);
+        throw Error(err.message);
     }
     else{
         return decoded;
@@ -22,6 +22,7 @@ const verifyToken = (token, alg) => {
     const signOptions = {
         algorithm: alg
     }
+    // TODO : Change functionality to get alg from user instead of using SUPPORTED_ALGS. Check for None also.
     if(alg.startsWith("RS")){
         logger.info(`RSA Detected`);
         return jwt.verify(token, public_key, signOptions, handleVerify);
@@ -42,11 +43,10 @@ const verifyRoute = (req, res) => {
     const alg = decoded.header.alg;
     if (!token) {
         logger.info(`No token provided in /verify. Alg: ${alg}, decoded: ${decoded}`)
-        // TODO: replace with authorization middleware
         return res.send("No token was provided. \nPlease provide a 'Token' header");
     }
     if (alg === "none"){
-        logger.warning(`User tried None algorithm. \n Token: ${decoded}`)
+        logger.warning(`User tried None algorithm. \n Token: JSON.stringify(${decoded})`)
         return res.status(404).json('None none for you!');
     }
     // Check unsupported alg use

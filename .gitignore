@@ -105,3 +105,6 @@ dist
 
 # WebStorm
 .idea*
+
+# Mac FTW
+.DS_STORE
