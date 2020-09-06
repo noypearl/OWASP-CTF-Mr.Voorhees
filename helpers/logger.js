@@ -5,13 +5,9 @@ const format = winston.format;
 const logger = winston.createLogger({
     level: 'info',
     format: format.combine(
-        format.timestamp({
-            format: 'YYYY-MM-DD HH:mm:ss'
-        }),
-        format.errors({ stack: true }),
-        format.splat(),
-        format.json()
-    ),
+        format.json(),
+        format.timestamp()),
+
     transports: [
         //
         // - Write all logs with level `error` and below to `error.log`

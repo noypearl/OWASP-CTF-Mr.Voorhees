@@ -2,13 +2,12 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const logger = require('../helpers/logger');
-const secret = require('../helpers/constants').secret;
 // TODO : "HIDE" key in the website
 const public_key = fs.readFileSync(path.join(__dirname , '../public', 'public.pem'), 'utf8');
 const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'HS256', 'HS384', 'HS512'];
 
 const handleVerify = (err, decoded) => {
-    logger.info(`handling verify`);
+    logger.info(`Handling verify on ${decoded.header} ${decoded.body}`);
     if (err){
         logger.error(err.message);
         throw Error(err.message);
@@ -18,22 +17,16 @@ const handleVerify = (err, decoded) => {
     }
 }
 
+// hehe :)
 const verifyToken = (token, alg) => {
     const signOptions = {
         algorithm: alg
     }
-    // TODO : Change functionality to get alg from user instead of using SUPPORTED_ALGS. Check for None also.
-    if(alg.startsWith("RS")){
-        logger.info(`RSA Detected`);
+    logger.info(`${alg} alg Detected in JWT from client`);
+    try {
         return jwt.verify(token, public_key, signOptions, handleVerify);
-    }
-    else if(alg.startsWith("HS")){
-        logger.info(`HMAC Detected`);
-        return jwt.verify(token, secret, signOptions, handleVerify)
-    }
-    else{
-        logger.error(`Unsupported algorithm ${alg}, ${token}`);
-        throw Error("Unsupported algorithm");
+    } catch (e) {
+        throw Error(e.message);
     }
 }
 
