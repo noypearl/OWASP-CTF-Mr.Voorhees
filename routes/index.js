@@ -2,11 +2,13 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const verifierController = require('../controllers/verifier');
+const tokenController = require('../controllers/token');
 const errorController = require('../controllers/error');
+const homeController = require('../controllers/home');
 
 // App routes
-// router.get('/', homeController);
-// router.post('/token', tokenController);
+router.get('/', homeController);
+router.post('/token', tokenController);
 router.get('/verify', verifierController);
 router.get('/error', errorController);
 
@@ -18,4 +20,4 @@ router.get('/print', (req, res) => {
 });
 
 // TODO : Error page
-module.exports = router
+module.exports = router;

@@ -1,4 +1,4 @@
-import logger from 'helpers/logger'
+const logger = require('../helpers/logger');
 
 const getHome = (req, res) => {
 // middleware - require token
@@ -14,4 +14,12 @@ const getHome = (req, res) => {
 
 
 }
+
 module.exports = getHome;
+
+
+// const homeController = {
+//     getHome,
+// }
+// const homeController = require()
+// homeController.get(Home)

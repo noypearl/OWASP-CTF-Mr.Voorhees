@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-import {secret} from 'helpers/constants';
+const secret = require('../helpers/constants').secret;
 
 const getToken = (req, res) => {
     const token = jwt.sign({ "username": "guest" }, secret, {algorithm: 'HS256'});
