@@ -1,0 +1,8 @@
+###############
+TODO: I should probably move it to somewhere else
+###############
+
+-----BEGIN PUBLIC KEY-----
+MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAZuHwpPeTJuO8wMVhKhWptHb42BwYH533
++OB1J4C+Kv0h6fzLlaHT9ni01l5viJ9Amn3Tpexl3GXqduDdzFU85wIDAQAB
+-----END PUBLIC KEY-----

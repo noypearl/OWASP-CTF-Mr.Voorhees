@@ -16,8 +16,14 @@ const logger = winston.createLogger({
         new winston.transports.File({ filename: `${appRoot}/logs/error.log`, level: 'error' }),
         new winston.transports.File({ filename: `${appRoot}/logs/combined.log` }),
     ],
+
 });
 
+logger.stream = {
+    write: function(message){
+        logger.info(message);
+    }
+};
 
 // If we're not in production then log to the `console` with the format:
 // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `

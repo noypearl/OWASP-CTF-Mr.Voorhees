@@ -2,26 +2,28 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
-const logger = require('./helpers/logger');
 const indexRouter = require('./routes/index');
-
+const morganLogsFormat = ":remote-addr :method :url :status :res[content-length] - :response-time ms :req[user-agent]";
 const app = express();
 
-app.use((req, res, next) => {
-  logger.info(`${req.method} for ${req.path}. Cookies: ${req.cookies}`)
-  next();
-})
-
-app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+// TODO - fix logging
+app.use(morgan(morganLogsFormat));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 
-app.get('*', (req, res) => {
-  logger.info('returning error page');
-  res.sendFile(path.join(__dirname , 'public', 'error.html'));
+
+
+// error route - returns error page
+app.use((err, req , res, next) => {
+  // TODO - replace with dynamic error page with error message
+  if (err) {
+    console.log('there is an error will return 404')
+    return res.send(err.message);
+  }
+  return next()
 });
 
 module.exports = app;

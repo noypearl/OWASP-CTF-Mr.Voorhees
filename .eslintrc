@@ -9,8 +9,7 @@
     "no-console": "off",
     "prefer-arrow-callback": "error",
     "prefer-const": ["error", {
-      "destructuring": "any",
-      "ignoreReadBeforeAssign": false
+      "destructuring": "any"
     }]
   },
   "parserOptions": {

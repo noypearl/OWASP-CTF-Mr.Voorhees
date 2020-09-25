@@ -11,8 +11,6 @@ const getHome = (req, res) => {
         logger.info(`Unauthorized token access - token`)
         return res.send("UNAUTHORIZED PAGE TODO")
     }
-
-
 }
 
 module.exports = getHome;
