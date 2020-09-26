@@ -10,7 +10,7 @@ const { tokenValidationMiddleware } = require('../middlewares');
 // App routes
 router.post('/verify', tokenValidationMiddleware, verifierController);
 router.get('/', tokenValidationMiddleware, homeController);
-//TODO - make /home return token if not provided instead of /token controller
+//TODO - make / return token if not provided instead of /token controller
 router.get('/token', tokenController);
 
 // TODO - delete before uploading to production
