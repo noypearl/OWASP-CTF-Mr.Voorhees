@@ -4,12 +4,13 @@ const router = express.Router();
 const tokenController = require('../controllers/token');
 const verifierController = require('../controllers/verifier');
 const homeController = require('../controllers/home');
-const { tokenMiddleware } = require('../middlewares');
+const { tokenValidationMiddleware } = require('../middlewares');
 
 
 // App routes
-router.post('/verify', tokenMiddleware, verifierController);
-router.get('/', tokenMiddleware, homeController);
+router.post('/verify', tokenValidationMiddleware, verifierController);
+router.get('/', tokenValidationMiddleware, homeController);
+//TODO - make /home return token if not provided instead of /token controller
 router.get('/token', tokenController);
 
 // TODO - delete before uploading to production

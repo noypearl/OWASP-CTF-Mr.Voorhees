@@ -1,4 +1,5 @@
 const logger = require('../helpers/logger');
+// const { authorizeUserByToken } = require('../middlewares');
 
 const getHome = (req, res) => {
 // middleware - require token

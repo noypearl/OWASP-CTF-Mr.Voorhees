@@ -1,11 +1,12 @@
-const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-const private_key = fs.readFileSync(path.join(__dirname , '../assets', 'private.key'), 'utf8');
+const { getNewToken } = require('../helpers/token');
 
-const getToken = (req, res) => {
-    const token = jwt.sign({ "username": "guest" }, private_key, {algorithm: 'RS256'});
-    res.json({'token': token});
+const getTokenRoute = (req, res, next) => {
+    const token = getNewToken();
+    if (token){
+        return res.send({token});
+    }
+    const err = new Error("failed to get token in token controller");
+    return next(err)
 }
 
-module.exports = getToken;
+module.exports = getTokenRoute;

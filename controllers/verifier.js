@@ -1,13 +1,12 @@
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
-const validator = require('validator')
 const logger = require('../helpers/logger');
-// TODO : "HIDE" key in the website
+
 const public_key = fs.readFileSync(path.join(__dirname , '../assets', 'public.pem'), 'utf8');
 const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'HS256', 'HS384', 'HS512'];
 
-const handleVerify = (err, decoded) => {
+const verifyTokenHandler = (err, decoded) => {
     logger.info(`Handling verify on ${decoded.header} ${decoded.body}`);
     if (err){
         logger.error(err.message);
@@ -25,7 +24,7 @@ const verifyToken = (token, alg) => {
     }
     logger.info(`${alg} alg Detected in JWT from client`);
     try {
-        return jwt.verify(token, public_key, signOptions, handleVerify);
+        return jwt.verify(token, public_key, signOptions, verifyTokenHandler);
     } catch (e) {
         throw Error(e.message);
     }
