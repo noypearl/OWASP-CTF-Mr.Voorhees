@@ -12,6 +12,7 @@ router.post('/verify', tokenMiddleware, verifierController);
 router.get('/', tokenMiddleware, homeController);
 router.get('/token', tokenController);
 
+// TODO - delete before uploading to production
 // Returns signed JWT
 router.get('/print', (req, res) => {
   const token = req.get("Token");

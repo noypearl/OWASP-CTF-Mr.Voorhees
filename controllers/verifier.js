@@ -42,7 +42,8 @@ const verifyRoute = (req, res, next) => {
         decoded = jwt.decode(token, {"complete": true});
     }
     catch(e){
-        logger.error(`error decoding jwt token: ${token}, err: ${e.message}`)
+        const errorMessage = e.message
+        logger.error(`error decoding jwt token: ${token}, err: ${errorMessage}`)
         return next(new Error(e.message));
     }
     const decoded_str = JSON.stringify(decoded);
@@ -66,7 +67,7 @@ const verifyRoute = (req, res, next) => {
         return res.send(tokenVerificationResult);
     }
     catch (e) {
-        const errorMessage = e.message
+        const errorMessage = e.message;
         logger.error(`Error on verify token ${token} : ${errorMessage}`);
         return next(new Error(errorMessage));
     }
