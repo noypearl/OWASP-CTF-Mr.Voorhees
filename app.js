@@ -10,12 +10,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// TODO - fix logging
+app.use('/', indexRouter);
+// TODO - fix logging - prevent static files
 app.use(morgan(morganLogsFormat));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/', indexRouter);
 
-// error 404 middleware - return static error page
+// error 404 and unsupported methods middleware - return static error page
 app.use((req, res) => {
   const { method, url } = req;
     logger.warn(`Invalid ${method} request to ${url}, returning 404`);
@@ -26,7 +26,8 @@ app.use((req, res) => {
 app.use((err, req , res, next) => {
   // TODO - replace with dynamic error page with error message
   if (err) {
-    logger.error(`Error middleware in ${req.url}. Error: ${err.message}`);
+    const { method, url } = req;
+    logger.error(`Error middleware ${method} request to ${url}. Error: ${err.message}`);
     return res.send('Server error');
   }
   return next()

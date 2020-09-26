@@ -22,16 +22,17 @@ const verifyToken = (token, alg) => {
     const signOptions = {
         algorithm: alg
     }
-    logger.info(`${alg} alg Detected in JWT from client`);
+    logger.info(`${alg} alg Detected in JWT from client. Token ${token}`);
     try {
         return jwt.verify(token, public_key, signOptions, verifyTokenHandler);
     } catch (e) {
-        throw Error(e.message);
+        throw new Error(e.message);
     }
 }
 
 const verifyRoute = (req, res, next) => {
-    const token = req.get("Token");
+    const { cookies } = req
+    const token = cookies && cookies.token || ''
     let decoded = '';
     if (!token) {
         logger.info(`No token provided in /verify. Alg: ${alg}, decoded: ${decoded}`)
@@ -40,29 +41,31 @@ const verifyRoute = (req, res, next) => {
     try{
         decoded = jwt.decode(token, {"complete": true});
     }
+    // TODO - fix DRY of error object
     catch(e){
         const errorMessage = e.message
         logger.error(`error decoding jwt token: ${token}, err: ${errorMessage}`)
-        return next(new Error(e.message));
+        return next(new Error(errorMessage));
     }
     const decoded_str = JSON.stringify(decoded);
-    const { alg } = decoded.header || '';
-
+    const { alg = '' }  = decoded.header;
     if (alg === "none"){
-        logger.warning(`User tried None algorithm. \n Token: ${decoded_str})`)
-        res.statusCode = 401;
-        return next(new Error('None none for you!'));
+        const err = new Error('None none for you!');
+        logger.error(`User tried None algorithm. \n Token: ${decoded_str}), error - ${err.message}`)
+        err.status = 401;
+        return next(err.message);
     }
     // Check unsupported alg use
     if(!SUPPORTED_ALGS.includes(alg)){
-        logger.warning(`Unsupported algorithm ${alg} ${decoded}`)
-        res.statusCode = 401;
-        return next(new Error("Unsupported algorithm. Nice try."));
+        const err = new Error('Unsupported algorithm. Nice try');
+        logger.error(`Unsupported algorithm ${alg} ${decoded_str} - error - ${err.message}`)
+        res.status = 401;
+        return next(err.message);
     }
     // Verify token according to algorithm
     try {
         const tokenVerificationResult = verifyToken(token, alg);
-        logger.info(tokenVerificationResult);
+        logger.info(`verified token: ${JSON.stringify(tokenVerificationResult)}`);
         return res.send(tokenVerificationResult);
     }
     catch (e) {

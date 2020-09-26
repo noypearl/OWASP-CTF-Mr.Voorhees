@@ -1,28 +1,29 @@
 const validator = require('validator');
+const path = require('path');
 const logger = require('./helpers/logger');
+const { getNewToken } = require('./helpers/token');
 
 module.exports = {
     // logs and verifies token and throws error in case something's wrong
-    tokenValidationMiddleware : (req, res, next) => {
-        const token = req.get('Token')
+    tokenValidationMiddleware: (req, res, next) => {
+        const { url, method, cookies } = req;
+        let token = cookies && cookies.token || ''
+        // setting cookie token
         if (!token) {
-        logger.error(`No token was provided in middleware to ${req.url}`)
-        const err = new Error("No token was provided");
-        err.status - 401;
-        return next(err);
+            logger.info(`No token was provided in ${method} middleware to ${url}`)
+            token = getNewToken();
+            logger.info(`Setting new token from middleware - ${token}`);
+            res.cookie('token', token);
+            logger.info('Returning homepage');
+            return res.sendFile(path.join(__dirname , 'public', '/index.html'));
         }
-        if (!validator.isJWT(token)){
+        if (!validator.isJWT(token)) {
             const err = new Error("Nope. Try again");
-            err.status - 401;
-            logger.error(`Invalid input was provided instead of JWT token to middleware in ${req.url}. Token: ${token}`)
+            err.status = 401;
+            logger.error(`Invalid input was provided instead of JWT token to middleware in ${url}. Token: ${token}`)
             return next(err);
         }
-        const { url } = req;
+        // TODO - try to unpack the token and check if username is admin. If so - pass next()
         logger.info(`middleware valid token to ${url}. Token: ${token}`)
         return next()
-    },
-    // TODO - add the middleware of token verification
-    tokenVerificationMiddleware: (req, res, next) => {
-
-    }
-}
+    }}

@@ -16,7 +16,7 @@ router.get('/token', tokenController);
 // TODO - delete before uploading to production
 // Returns signed JWT
 router.get('/print', (req, res) => {
-  const token = req.get("Token");
+  const token = req.cookies && req.cookies.token || ''
   const decoded = jwt.decode(token, {"complete": true});
   return res.json({"full_token": decoded,"header": decoded.header.alg});
 });
