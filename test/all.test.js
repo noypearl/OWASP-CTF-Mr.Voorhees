@@ -136,7 +136,7 @@ describe('Validate token', () => {
         const test = jwt.sign({username: "NOY"}, "ABC");
         const test_decry = jwt.verify(test,"ABC")
         // loggers.warn(`HERE it is ${test_decry}`)
-        const token = jwt.sign({username: "admin"}, "ABC");
+        const token = jwt.sign({username: "aaaa"}, public_key, {algorithm: "HS256"});
         chai.request(app)
             .get('/')
             .set("Cookie", `token=${token}`)

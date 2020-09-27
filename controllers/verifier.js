@@ -31,7 +31,7 @@ const verifyToken = (token, alg) => {
     }
     logger.info(`${alg} alg Detected in JWT from client. Token ${token}`);
     try {
-        return jwt.verify(token, "ABC", verifyTokenHandler);
+        return jwt.verify(token, public_key,{algorithm: "HS256"}, verifyTokenHandler);
     } catch (e) {
         throw new Error(e.message);
     }
