@@ -18,7 +18,7 @@ const app = require('../app.js');
 // Configure chai
 chai.use(chaiHttp);
 
-const generateJWT = (username, key = private_key, alg = 'RS256', extras = {}) => {
+const generateJWT = (username, key, alg , extras = {}) => {
     const payload = {username, ...extras}
     return jwt.sign(payload, private_key, {algorithm: alg});
 }
@@ -133,13 +133,16 @@ describe('Validate token', () => {
 
     });
     it('should return FLAG for token with admin and aditionals', () => {
-        const token = generateJWT("admin", public_key, "HS256");
+        const test = jwt.sign({username: "NOY"}, "ABC");
+        const test_decry = jwt.verify(test,"ABC")
+        // loggers.warn(`HERE it is ${test_decry}`)
+        const token = jwt.sign({username: "admin"}, "ABC");
         chai.request(app)
             .get('/')
             .set("Cookie", `token=${token}`)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.body).to.be("FLAG!");
+                expect(res.body).to.equal("FLAG!");
             })
     });
     it('should return unsupported method', () => {

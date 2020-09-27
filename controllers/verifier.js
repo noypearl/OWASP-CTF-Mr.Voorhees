@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const logger = require('../helpers/logger');
-
+const jwt_decode = require('jwt-decode');
 const public_key = fs.readFileSync(path.join(__dirname , '../assets', 'public.pem'), 'utf8');
 const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'HS256', 'HS384', 'HS512'];
 
@@ -31,7 +31,7 @@ const verifyToken = (token, alg) => {
     }
     logger.info(`${alg} alg Detected in JWT from client. Token ${token}`);
     try {
-        return jwt.verify(token, public_key, signOptions, verifyTokenHandler);
+        return jwt.verify(token, "ABC", verifyTokenHandler);
     } catch (e) {
         throw new Error(e.message);
     }
@@ -47,7 +47,11 @@ const verifyTokenMiddleware = (req) => {
         throwUnauthorizedError(errMessage)
     }
     try{
-        decoded = jwt.decode(token, {"complete": true});
+        const body = jwt_decode(token);
+        const header = jwt_decode(token, {header: true});
+        decoded = {
+            'header': header,...body
+        }
     }
     // TODO - fix DRY of error object
     catch(e){
