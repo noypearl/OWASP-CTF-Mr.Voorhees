@@ -55,7 +55,7 @@ const verifyTokenMiddleware = (req) => {
         throwUnauthorizedError(e);
     }
     const decoded_str = JSON.stringify(decoded);
-    const { alg = '' }  = decoded.header;
+    const { alg = '' }  = decoded.header || 'RS256';
     if (alg === "none"){
         const errMessage = 'None none for you!';
         logger.error(`User tried None algorithm. \n Token: ${decoded_str})`)
