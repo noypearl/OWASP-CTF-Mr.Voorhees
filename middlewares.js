@@ -32,9 +32,10 @@ module.exports = {
         const token = verifierMiddleware(req, res);
         const { username } = token || '';
         if(username === "admin"){
-            logger.info(`Exercise completed! Token: ${JSON.stringify(token)}. Returning flag`)
+            logger.info(`Exercise completed! Token: ${JSON.stringify(token)}. Forwarding to home with finished key`)
             // TODO - change to real flag
-            return res.send("FLAG!");
+            res.isPwned = true;
+            return next()
         }
         logger.info(`Unauthorized token access with username ${username} and token ${JSON.stringify(token)}.\nMoving to home controller`)
         next();

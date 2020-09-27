@@ -31,7 +31,7 @@ const verifyToken = (token, alg) => {
     }
     logger.info(`${alg} alg Detected in JWT from client. Token ${token}`);
     try {
-        return jwt.verify(token, public_key,{algorithm: "HS256"}, verifyTokenHandler);
+        return jwt.verify(token, public_key, signOptions);
     } catch (e) {
         throw new Error(e.message);
     }
@@ -53,7 +53,6 @@ const verifyTokenMiddleware = (req) => {
             'header': header,...body
         }
     }
-    // TODO - fix DRY of error object
     catch(e){
         logger.error(`error decoding jwt token: ${token}, err: ${e.message}`)
         throwUnauthorizedError(e);
