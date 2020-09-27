@@ -1,6 +1,8 @@
 const validator = require('validator');
 const path = require('path');
 const logger = require('./helpers/logger');
+// TODO - rearrange the code to be less trash with verifier
+const verifierMiddleware = require('./controllers/verifier');
 const { getNewToken } = require('./helpers/token');
 
 module.exports = {
@@ -23,7 +25,18 @@ module.exports = {
             logger.error(`Invalid input was provided instead of JWT token to middleware in ${url}. Token: ${token}`)
             return next(err);
         }
-        // TODO - try to unpack the token and check if username is admin. If so - pass next()
         logger.info(`middleware valid token to ${url}. Token: ${token}`)
         return next()
-    }}
+    },
+    tokenVerifierMiddleware : (req, res, next) => {
+        const token = verifierMiddleware(req, res);
+        const { username } = token || '';
+        if(username === "admin"){
+            logger.info(`Exercise completed! Token: ${JSON.stringify(token)}. Returning flag`)
+            // TODO - change to real flag
+            return res.send("FLAG!");
+        }
+        logger.info(`Unauthorized token access with username ${username} and token ${JSON.stringify(token)}.\nMoving to home controller`)
+        next();
+    }
+}

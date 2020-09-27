@@ -7,7 +7,8 @@ const public_key = fs.readFileSync(path.join(__dirname , '../assets', 'public.pe
 const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'HS256', 'HS384', 'HS512'];
 
 const verifyTokenHandler = (err, decoded) => {
-    logger.info(`Handling verify on ${decoded.header} ${decoded.body}`);
+    const decoded_str = JSON.stringify(decoded);
+    logger.info(`Handling verify on ${decoded_str}`);
     if (err){
         logger.error(err.message);
         throw Error(err.message);
@@ -15,6 +16,12 @@ const verifyTokenHandler = (err, decoded) => {
     else{
         return decoded;
     }
+}
+
+const throwUnauthorizedError = (errMessage) => {
+    const err = new Error(errMessage);
+    err.status = 401;
+    throw err;
 }
 
 // hehe :)
@@ -30,49 +37,48 @@ const verifyToken = (token, alg) => {
     }
 }
 
-const verifyRoute = (req, res, next) => {
+const verifyTokenMiddleware = (req) => {
     const { cookies } = req
     const token = cookies && cookies.token || ''
     let decoded = '';
     if (!token) {
-        logger.info(`No token provided in /verify. Alg: ${alg}, decoded: ${decoded}`)
-        return res.send("No token was provided. \nPlease provide a 'Token' header");
+        const errMessage = "No token was provided.";
+        logger.info(`No token was provided in ${req}. Alg: ${alg}`)
+        throwUnauthorizedError(errMessage)
     }
     try{
         decoded = jwt.decode(token, {"complete": true});
     }
     // TODO - fix DRY of error object
     catch(e){
-        const errorMessage = e.message
-        logger.error(`error decoding jwt token: ${token}, err: ${errorMessage}`)
-        return next(new Error(errorMessage));
+        logger.error(`error decoding jwt token: ${token}, err: ${e.message}`)
+        throwUnauthorizedError(e);
     }
     const decoded_str = JSON.stringify(decoded);
     const { alg = '' }  = decoded.header;
     if (alg === "none"){
-        const err = new Error('None none for you!');
-        logger.error(`User tried None algorithm. \n Token: ${decoded_str}), error - ${err.message}`)
-        err.status = 401;
-        return next(err.message);
+        const errMessage = 'None none for you!';
+        logger.error(`User tried None algorithm. \n Token: ${decoded_str})`)
+        throwUnauthorizedError(errMessage)
     }
     // Check unsupported alg use
     if(!SUPPORTED_ALGS.includes(alg)){
-        const err = new Error('Unsupported algorithm. Nice try');
-        logger.error(`Unsupported algorithm ${alg} ${decoded_str} - error - ${err.message}`)
-        res.status = 401;
-        return next(err.message);
+        const errMessage = 'Unsupported algorithm. Nice try';
+        logger.error(`Unsupported algorithm ${alg} . Token: ${decoded_str}`)
+        throwUnauthorizedError(errMessage);
     }
     // Verify token according to algorithm
     try {
         const tokenVerificationResult = verifyToken(token, alg);
         logger.info(`verified token: ${JSON.stringify(tokenVerificationResult)}`);
-        return res.send(tokenVerificationResult);
+        // returns the token as json
+        return tokenVerificationResult;
     }
     catch (e) {
         const errorMessage = e.message;
-        logger.error(`Error on verify token ${token} : ${errorMessage}`);
-        return next(new Error(errorMessage));
+        logger.error(`Error on verify token ${JSON.stringify(token)} : ${errorMessage}`);
+        throwUnauthorizedError(errorMessage)
     }
 }
 
-module.exports = verifyRoute;
+module.exports = verifyTokenMiddleware;

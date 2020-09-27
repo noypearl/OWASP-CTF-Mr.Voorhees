@@ -1,18 +1,11 @@
+const path = require('path');
 const logger = require('../helpers/logger');
-// const { authorizeUserByToken } = require('../middlewares');
 
 const getHome = (req, res) => {
-// middleware - require token
-    const token = req.cookies && req.cookies.token || ''
-    if(token) {
-        logger.info(`Exercise completed! Token: ${token} Returning flag`)
-        return res.send("FLAG!")
-    }
-    else{
-        logger.info(`Unauthorized token access - token`)
-        return res.send("UNAUTHORIZED PAGE TODO")
-    }
+    logger.info(`Returning homepage at ${req.method} request to ${req.url}`)
+    return res.sendFile(path.join(__dirname , '../public', '/index.html'));
 }
+
 
 module.exports = getHome;
 
