@@ -68,7 +68,7 @@ const verifyTokenMiddleware = (req) => {
     catch (e) {
         const errorMessage = e.message;
         logger.error(`Error on verify token ${JSON.stringify(token)} : ${errorMessage}`);
-        throwUnauthorizedError(errorMessage)
+        throwUnauthorizedError("Server Error")
     }
 }
 module.exports = verifyTokenMiddleware;

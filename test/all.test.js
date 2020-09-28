@@ -123,7 +123,7 @@ describe('Validate token', () => {
                 .end((err, res) => {
                     expect(res.status).to.equal(401);
                     // expect(res.body).to.equal("None none for you!")
-                })
+                });
 
         });
     it('should return invalid JWT token for non-jwt token', () => {
@@ -134,7 +134,7 @@ describe('Validate token', () => {
             .end((err, res) => {
                 expect(res.status).to.equal(401);
             expect(res.text).to.equal("Nope. Try again");
-            })
+            });
     });
     it('should return FLAG for token with admin', () => {
         const token = generateJWT("admin", public_key, "HS256");
@@ -144,11 +144,9 @@ describe('Validate token', () => {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal("FLAG!");
-            })
+            });
     });
     it('should return FLAG for token with admin and aditionals', () => {
-        const test = jwt.sign({username: "NOY"}, "ABC");
-        const test_decry = jwt.verify(test,"ABC")
         const token = generateJWT("admin", public_key, "HS256", {test: 2});
         chai.request(app)
             .get('/')
@@ -156,7 +154,17 @@ describe('Validate token', () => {
             .end((err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal("FLAG!");
-            })
+            });
+    });
+    it('should return FLAG for token with AdMiN in capital and aditionals', () => {
+        const token = generateJWT("AdMiN", public_key, "HS256", {test: 2});
+        chai.request(app)
+            .get('/')
+            .set("Cookie", `token=${token}`)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal("FLAG!");
+            });
     });
     it('should return nice try for invalid JWT signature', () => {
         const token = generateJWT("admin", "falsy-key", "HS256", {test: 2});
@@ -165,8 +173,8 @@ describe('Validate token', () => {
             .set("Cookie", `token=${token}`)
             .end((err, res) => {
                 expect(res.status).to.equal(401);
-                expect(res.text).to.equal("FLAG!");
-            })
+                expect(res.text).to.equal("Server Error");
+            });
     });
     it('should return unsupported method', () => {
         const token = generateJWT("admin", public_key, "HS256");

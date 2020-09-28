@@ -31,7 +31,7 @@ module.exports = {
     tokenVerifierMiddleware : (req, res, next) => {
         const token = verifierMiddleware(req, res);
         const { username } = token || '';
-        if(username === "admin"){
+        if(username && username.toLowerCase() === "admin"){
             logger.info(`Exercise completed! Token: ${JSON.stringify(token)}. Forwarding to home with finished key`)
             // TODO - change to real flag
             res.isPwned = true;

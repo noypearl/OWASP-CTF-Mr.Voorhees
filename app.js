@@ -27,7 +27,7 @@ app.use((err, req , res, next) => {
   // TODO - replace with dynamic error page with error message
   if (err) {
     const { method, url } = req;
-    logger.error(`Error middleware ${method} request to ${url}. Error ${err.status}: ${err.message}`);
+    logger.error(`Error middleware ${method} request to ${url}.-  error ${err.status}: ${err.message}`);
     // Return 401 error messages
     if(err.status === 401) {
       return res.status(401).send(err.message);
