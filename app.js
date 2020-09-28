@@ -12,27 +12,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // TODO - fix logging - prevent static files
 app.use(morgan(morganLogsFormat));
+app.use('/', indexRouter);
 app.use(express.static(path.join(__dirname, 'public')));
+
+// error 404 and unsupported methods middleware - return static error page
+app.use((req, res) => {
+    const { method, url } = req;
+    logger.warn(`Invalid ${method} request to ${url}, returning 404`);
+    return res.status(404).sendFile(path.join(__dirname , 'public', '/error.html'));
+});
+
 
 // error route - returns error page
 app.use('/' ,(err, req , res, next) => {
   // TODO - replace with dynamic error page with error message
     const { method, url } = req;
-    logger.error(`Error middleware ${method} request to ${url}.-  error ${err.status}: ${err.message}`);
-    // Return 401 error messages
-    if(err.status === 401 || err.status === 400) {
-      return res.status(err.status).send(err.message);
-    }
-    logger.info("returning Server Error generic message");
+    logger.error(`Error middleware ${method} request to ${url}.-  error ${err.message}`);
     return res.status(500).send('Server Error');
-});
-app.use('/', indexRouter);
-
-// error 404 and unsupported methods middleware - return static error page
-app.use((req, res) => {
-  const { method, url } = req;
-    logger.warn(`Invalid ${method} request to ${url}, returning 404`);
-    return res.status(404).sendFile(path.join(__dirname , 'public', '/error.html'));
 });
 
 

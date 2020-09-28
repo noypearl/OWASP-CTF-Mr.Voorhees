@@ -47,7 +47,7 @@ describe('Token variation submission', () => {
             });
     });
     // token will be {header: {.....}, "HelloA"} instead of {header: {.....}, {username: "me"}
-    it('should return unauthorized 401 for token with string body instead of object body', () => {
+    it('should return 400 for token with string body instead of object body', () => {
         const token = jwt.sign("hello", public_key, {algorithm: "HS256"});
         chai.request(app)
             .get('/')
@@ -57,8 +57,8 @@ describe('Token variation submission', () => {
                 expect(token).to.not.be.null;
                 const isTokenJWT = validator.isJWT(token);
                 expect(isTokenJWT).to.be.true;
-                expect(res.status).to.equal(401);
-                expect(res.body).to.equal("Server Error");
+                expect(res.status).to.equal(400);
+                expect(res.error.text).to.equal("Nope. Try again.");
             });
     });
 
@@ -123,7 +123,7 @@ describe('Validate token', () => {
                 expect(res.error.text).to.equal("None none for you!")
         });
     });
-    it('should return unauthorized message 401 when sending jwt with string as payload instead of json',  () => {
+    it('should return Try again 400 when sending jwt with string as payload instead of json',  () => {
             const payload = "Tester";
             const token = jwt.sign(payload, private_key, {algorithm: "RS256"});
             chai.request(app)
@@ -131,7 +131,7 @@ describe('Validate token', () => {
                 .set("Cookie", `token=${token}`)
                 .end((err, res) => {
                     expect(res.status).to.equal(400);
-                    expect(res.body).to.equal("Nope. Try again.")
+                    expect(res.error.text).to.equal("Nope. Try again.")
                 });
 
         });
@@ -181,8 +181,8 @@ describe('Validate token', () => {
             .get('/')
             .set("Cookie", `token=${token}`)
             .end((err, res) => {
-                expect(res.status).to.equal(401);
-                expect(res.text).to.equal("Server Error");
+                expect(res.status).to.equal(400);
+                expect(res.text).to.equal("Nope. Try again.");
             });
     });
     it('should return unsupported method', () => {
