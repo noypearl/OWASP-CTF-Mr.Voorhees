@@ -6,9 +6,9 @@ const jwt_decode = require('jwt-decode');
 const public_key = fs.readFileSync(path.join(__dirname , '../assets', 'public.pem'), 'utf8');
 const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'HS256', 'HS384', 'HS512'];
 
-const throwUnauthorizedError = (errMessage) => {
-    const err = new Error(errMessage);
-    err.status = 401;
+const throwErrorWithMessageAndStatus = (message, status) => {
+    const err = new Error(message);
+    err.status = status;
     throw err;
 }
 
@@ -25,38 +25,53 @@ const verifyToken = (token, alg) => {
     }
 }
 
-const verifyTokenMiddleware = (req) => {
-    const { cookies } = req
-    const token = cookies && cookies.token || ''
-    let decoded = '';
+const getVerifiedToken = (token) => {
     if (!token) {
-        const errMessage = "No token was provided.";
-        logger.info(`No token was provided in ${req}. Alg: ${alg}`)
-        throwUnauthorizedError(errMessage)
+        const errMessage = "Wait a minute - Who Are You??";
+        logger.info(`No token was provided in ${req}. Alg: ${alg}. Throwing ${errMessage}`)
+        throwErrorWithMessageAndStatus(errMessage, 401)
     }
+    let decoded = '';
     try{
         const body = jwt_decode(token);
+        if (typeof body !== "object") {
+            logger.error("Token body is not an object. Body: ${body}, Token: ${token}, Throwing server error");
+            throwErrorWithMessageAndStatus("Nope. Try again.", 400);
+        }
         const header = jwt_decode(token, {header: true});
+        if (typeof header !== "object"){
+            logger.error("Token header is not an object. Header: ${header}, Token: ${token}, Throwing server error")
+            throwErrorWithMessageAndStatus("Nope. Try again.", 400)
+        }
+        if (!body.hasOwnProperty("username")) {
+           logger.error("Missing username from token header. Header: ${header}, Token: ${token}, throwing server error")
+            throwErrorWithMessageAndStatus(("Wait a minute - Who Are You??"));
+        }
         decoded = {
             'header': header, ...body
         }
     }
     catch(e){
-        logger.error(`error decoding jwt token: ${token}, err: ${e.message}`)
-        throwUnauthorizedError(e);
+        logger.error(`error decoding jwt token: ${token}, Error: ${e.message}, Throwing Server Error`)
+        // Prevent from informative errors
+        if(e.status && e.status === 400) {
+            throwErrorWithMessageAndStatus(e.message, 401);
+        }
+        else {
+            throwErrorWithMessageAndStatus("Nope. Try again", 400)
+        }
     }
     const decoded_str = JSON.stringify(decoded);
     const { alg = '' }  = decoded.header || 'RS256';
     if (alg === "none"){
-        const errMessage = 'None none for you!';
         logger.error(`User tried None algorithm. \n Token: ${decoded_str})`)
-        throwUnauthorizedError(errMessage)
+        throwErrorWithMessageAndStatus('None none for you!', 401)
     }
     // Check unsupported alg use
     if(!SUPPORTED_ALGS.includes(alg)){
         const errMessage = 'Unsupported algorithm. Nice try';
         logger.error(`Unsupported algorithm ${alg} . Token: ${decoded_str}`)
-        throwUnauthorizedError(errMessage);
+        throwErrorWithMessageAndStatus(errMessage, 401);
     }
     // Verify token according to algorithm
     try {
@@ -68,7 +83,7 @@ const verifyTokenMiddleware = (req) => {
     catch (e) {
         const errorMessage = e.message;
         logger.error(`Error on verify token ${JSON.stringify(token)} : ${errorMessage}`);
-        throwUnauthorizedError("Server Error")
+        throwErrorWithMessageAndStatus("Server Error", 500);
     }
 }
-module.exports = verifyTokenMiddleware;
+module.exports = getVerifiedToken;

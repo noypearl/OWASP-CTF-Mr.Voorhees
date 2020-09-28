@@ -32,9 +32,7 @@ const getTokenFromCookie = (cookieStr) => {
     throw Error("Cookie doesn't exist");
 }
 
-
-
-describe('Get new token', () => {
+describe('Token variation submission', () => {
     it('should return token to request without token cookie', () => {
         chai.request(app)
             .get('/')
@@ -48,16 +46,30 @@ describe('Get new token', () => {
                 expect(res.status).to.equal(200);
             });
     });
-    it('should return token to request without cookies at all', () => {
+    // token will be {header: {.....}, "HelloA"} instead of {header: {.....}, {username: "me"}
+    it('should return unauthorized 401 for token with string body instead of object body', () => {
+        const token = jwt.sign("hello", public_key, {algorithm: "HS256"});
         chai.request(app)
             .get('/')
+            .set("Cookie", `token=${token}`)
             .end((err, res) => {
                 expect(err).to.be.null;
-                const token = getTokenFromCookie(res.header["set-cookie"]);
                 expect(token).to.not.be.null;
                 const isTokenJWT = validator.isJWT(token);
                 expect(isTokenJWT).to.be.true;
-                expect(res.status).to.equal(200);
+                expect(res.status).to.equal(401);
+                expect(res.body).to.equal("Server Error");
+            });
+    });
+
+    it('should return homepage for request to invalid route with valid token',  () => {
+        const token = generateJWT("admin", public_key, "HS256");
+        chai.request(app)
+            .get('/heeey')
+            .set("Cookie", `token=${token}`)
+            .end((err, res) => {
+                expect(res.status).to.equal(404);
+                expect(res.type).to.equal("text/html");
             });
     });
 
@@ -90,10 +102,9 @@ describe('Get new token', () => {
         });
     });
 
-//
 describe('Validate token', () => {
     it('should return homepage for user test', () => {
-        const token = generateJWT("test", private_key, "HS256");
+        const token = generateJWT("test", private_key, "RS256");
         chai.request(app)
             .get('/')
             .set("Cookie",`token=${token}`)
@@ -102,7 +113,7 @@ describe('Validate token', () => {
                expect(res.type).to.equal("text/html");
             });
     });
-    it('should return None nan for you error', () => {
+    it('should return None none for you error', () => {
         const token = generateJWT("admin", private_key, "none")
         chai.request(app)
             .get('/')
@@ -111,9 +122,7 @@ describe('Validate token', () => {
                 expect(res.status).to.equal(401);
                 expect(res.error.text).to.equal("None none for you!")
         });
-
     });
-    // TODO - pass this test in order to fix a bug in verifier.js
     it('should return unauthorized message 401 when sending jwt with string as payload instead of json',  () => {
             const payload = "Tester";
             const token = jwt.sign(payload, private_key, {algorithm: "RS256"});
@@ -121,8 +130,8 @@ describe('Validate token', () => {
                 .get('/')
                 .set("Cookie", `token=${token}`)
                 .end((err, res) => {
-                    expect(res.status).to.equal(401);
-                    // expect(res.body).to.equal("None none for you!")
+                    expect(res.status).to.equal(400);
+                    expect(res.body).to.equal("Nope. Try again.")
                 });
 
         });
@@ -133,7 +142,7 @@ describe('Validate token', () => {
             .set("Cookie", `token=${token}`)
             .end((err, res) => {
                 expect(res.status).to.equal(401);
-            expect(res.text).to.equal("Nope. Try again");
+            expect(res.text).to.equal("Nope. Try again.");
             });
     });
     it('should return FLAG for token with admin', () => {
@@ -185,6 +194,17 @@ describe('Validate token', () => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.equal("FLAG!");
             })
+    });
+    it('should return wait a minute for token without a username',  () => {
+        const payload = {show: "time"};
+        const token = jwt.sign(payload, private_key, {algorithm: "RS256"});
+        chai.request(app)
+            .get('/')
+            .set("Cookie",`token=${token}`)
+            .end((err, res) => {
+                expect(res.status).to.equal(400);
+                expect(res.error.text).to.equal("Wait a minute - Who Are You??")
+            });
     });
 });
 

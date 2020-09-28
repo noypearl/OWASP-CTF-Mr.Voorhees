@@ -2,7 +2,7 @@ const path = require('path');
 const logger = require('../helpers/logger');
 
 const getHome = (req, res) => {
-    if (res.isPwned){
+    if (!!res.isPwned){
         logger.info("Got flag! Returning flag in /home")
         return res.send("FLAG!")
     }

@@ -2,7 +2,7 @@ const validator = require('validator');
 const path = require('path');
 const logger = require('./helpers/logger');
 // TODO - rearrange the code to be less trash with verifier
-const verifierMiddleware = require('./controllers/verifier');
+const getVerifiedToken = require('./controllers/verifier');
 const { getNewToken } = require('./helpers/token');
 
 module.exports = {
@@ -20,24 +20,40 @@ module.exports = {
             return res.sendFile(path.join(__dirname , 'public', '/index.html'));
         }
         if (!validator.isJWT(token)) {
-            const err = new Error("Nope. Try again");
+            const err = new Error("Nope. Try again.");
             err.status = 401;
             logger.error(`Invalid input was provided instead of JWT token to middleware in ${url}. Token: ${token}`)
             return next(err);
         }
         logger.info(`middleware valid token to ${url}. Token: ${token}`)
-        return next();
+        return next()
     },
+    // TODO - use better structure
     tokenVerifierMiddleware : (req, res, next) => {
-        const token = verifierMiddleware(req, res);
+        const { cookies } = req
+        let token = cookies && cookies.token || ''
+        const decoded = '';
+        if (!token) {
+        logger.error("No token provided in tokenVerifierMiddleware. Calling next")
+            return next(new Error ("Server Error"));
+        }
+        try {
+            logger.info(`trying to verify token ${token}`)
+            token = getVerifiedToken(token);
+        }
+        catch (e){
+            return next(e.message)
+        }
         const { username } = token || '';
-        if(username && username.toLowerCase() === "admin"){
+        if(username.toLowerCase() === "admin"){
             logger.info(`Exercise completed! Token: ${JSON.stringify(token)}. Forwarding to home with finished key`)
             // TODO - change to real flag
             res.isPwned = true;
-            return next()
+            return next('/route');
         }
-        logger.info(`Unauthorized token access with username ${username} and token ${JSON.stringify(token)}.\nMoving to home controller`)
-        return next();
+        else{
+            logger.info(`Unauthorized token access with username ${username} and token ${JSON.stringify(token)}.\nMoving to home controller`)
+            return next('/route');
+        }
     }
 }
