@@ -26,7 +26,7 @@ module.exports = {
             return next(err);
         }
         logger.info(`middleware valid token to ${url}. Token: ${token}`)
-        return next()
+        return next();
     },
     tokenVerifierMiddleware : (req, res, next) => {
         const token = verifierMiddleware(req, res);
@@ -38,6 +38,6 @@ module.exports = {
             return next()
         }
         logger.info(`Unauthorized token access with username ${username} and token ${JSON.stringify(token)}.\nMoving to home controller`)
-        next();
+        return next();
     }
 }

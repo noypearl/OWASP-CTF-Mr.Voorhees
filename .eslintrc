@@ -20,7 +20,8 @@
     "mocha/no-mocha-arrows": "off"
   },
   "parserOptions": {
-    "sourceType": "module"
+    "sourceType": "module",
+    "ecmaVersion": 2018
   },
   "plugins": [
     "mocha"

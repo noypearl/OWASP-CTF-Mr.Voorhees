@@ -20,7 +20,7 @@ chai.use(chaiHttp);
 
 const generateJWT = (username, key, alg , extras = {}) => {
     const payload = {username, ...extras}
-    return jwt.sign(payload, private_key, {algorithm: alg});
+    return jwt.sign(payload, key, {algorithm: alg});
 }
 
 const getTokenFromCookie = (cookieStr) => {
@@ -93,7 +93,7 @@ describe('Get new token', () => {
 //
 describe('Validate token', () => {
     it('should return homepage for user test', () => {
-        const token = generateJWT("test", private_key);
+        const token = generateJWT("test", private_key, "HS256");
         chai.request(app)
             .get('/')
             .set("Cookie",`token=${token}`)
@@ -127,26 +127,56 @@ describe('Validate token', () => {
 
         });
     it('should return invalid JWT token for non-jwt token', () => {
-
+        const token = "MEVIN";
+        chai.request(app)
+            .get('/')
+            .set("Cookie", `token=${token}`)
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+            expect(res.text).to.equal("Nope. Try again");
+            })
     });
     it('should return FLAG for token with admin', () => {
-
-    });
-    it('should return FLAG for token with admin and aditionals', () => {
-        const test = jwt.sign({username: "NOY"}, "ABC");
-        const test_decry = jwt.verify(test,"ABC")
-        // loggers.warn(`HERE it is ${test_decry}`)
-        const token = jwt.sign({username: "admin"}, public_key, {algorithm: "HS256"});
+        const token = generateJWT("admin", public_key, "HS256");
         chai.request(app)
             .get('/')
             .set("Cookie", `token=${token}`)
             .end((err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.body).to.equal("FLAG!");
+                expect(res.text).to.equal("FLAG!");
+            })
+    });
+    it('should return FLAG for token with admin and aditionals', () => {
+        const test = jwt.sign({username: "NOY"}, "ABC");
+        const test_decry = jwt.verify(test,"ABC")
+        const token = generateJWT("admin", public_key, "HS256", {test: 2});
+        chai.request(app)
+            .get('/')
+            .set("Cookie", `token=${token}`)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal("FLAG!");
+            })
+    });
+    it('should return nice try for invalid JWT signature', () => {
+        const token = generateJWT("admin", "falsy-key", "HS256", {test: 2});
+        chai.request(app)
+            .get('/')
+            .set("Cookie", `token=${token}`)
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+                expect(res.text).to.equal("FLAG!");
             })
     });
     it('should return unsupported method', () => {
-
+        const token = generateJWT("admin", public_key, "HS256");
+        chai.request(app)
+            .get('/')
+            .set("Cookie", `token=${token}`)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal("FLAG!");
+            })
     });
 });
 

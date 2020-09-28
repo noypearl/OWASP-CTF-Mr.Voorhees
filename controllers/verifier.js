@@ -6,18 +6,6 @@ const jwt_decode = require('jwt-decode');
 const public_key = fs.readFileSync(path.join(__dirname , '../assets', 'public.pem'), 'utf8');
 const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'HS256', 'HS384', 'HS512'];
 
-const verifyTokenHandler = (err, decoded) => {
-    const decoded_str = JSON.stringify(decoded);
-    logger.info(`Handling verify on ${decoded_str}`);
-    if (err){
-        logger.error(err.message);
-        throw Error(err.message);
-    }
-    else{
-        return decoded;
-    }
-}
-
 const throwUnauthorizedError = (errMessage) => {
     const err = new Error(errMessage);
     err.status = 401;
@@ -50,7 +38,7 @@ const verifyTokenMiddleware = (req) => {
         const body = jwt_decode(token);
         const header = jwt_decode(token, {header: true});
         decoded = {
-            'header': header,...body
+            'header': header, ...body
         }
     }
     catch(e){
@@ -83,5 +71,4 @@ const verifyTokenMiddleware = (req) => {
         throwUnauthorizedError(errorMessage)
     }
 }
-
 module.exports = verifyTokenMiddleware;

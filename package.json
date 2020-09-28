@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "./node_modules/.bin/mocha",
-    "postinstall": "patch-package"
+    "test": "./node_modules/.bin/mocha"
   },
   "dependencies": {
     "app-root-path": "^3.0.0",
@@ -16,7 +15,7 @@
     "debug": "~2.6.9",
     "express": "^4.16.4",
     "http-errors": "~1.6.3",
-    "jsonwebtoken": "file:../node-jsonwebtoken",
+    "jsonwebtoken": "github:noypearl/node-jsonwebtoken#fix-version",
     "jwt-decode": "^3.0.0-beta.2",
     "morgan": "~1.9.1",
     "patch-package": "^6.2.2",
