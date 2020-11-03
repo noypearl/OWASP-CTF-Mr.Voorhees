@@ -1,6 +1,6 @@
 # Mr.Voorhees - CTF Challenge
 
-CTF challenge I made, inspired by Friday The 13th theme.
+CTF challenge I made for OWASP CTF inspired by Friday The 13th theme.
 
 ## Installation
 
