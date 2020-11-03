@@ -2,6 +2,8 @@
 
 CTF challenge I made for [OWASP AppSec IL CTF](https://ctftime.org/event/1152) inspired by Friday The 13th theme.
 
+![alt text](https://i.ibb.co/gdpNptS/mr-voorhees.png "Logo Title Text 1")
+
 ## Installation
 
 First - clone the repository and cd
