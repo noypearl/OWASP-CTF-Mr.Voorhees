@@ -1,0 +1,26 @@
+{
+  "UNSUPPORTED_ALG": {
+    "name": "Unsupported algorithm. Nice try",
+    "code": 404
+  },
+  "WHO_ARE_YOU": {
+    "name": "Wait a minute - Who Are You??",
+    "code": 400
+  },
+  "TRY_AGAIN": {
+    "name": "Nope. Try again.",
+    "code": 400
+  },
+  "SERVER_ERROR": {
+    "name": "Server Error",
+    "code": 500
+  },
+  "NONE_NONE": {
+    "name": "None none for you!",
+    "code": 401
+  },
+  "FLAG": {
+    "name": "AppSec-IL{100k_wh47_y0u_d1d_70_h1m}",
+    "code": 200
+  }
+}

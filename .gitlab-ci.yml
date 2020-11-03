@@ -1,0 +1,33 @@
+services:
+  - docker:dind
+
+default:
+  image: docker:latest
+  tags:
+    - docker
+
+variables:
+  DOCKER_DRIVER: overlay
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+  RANCHER_URL: https://rancher.appsecil.ctf.today:8443/
+
+before_script:
+  - apk update
+  - apk add curl docker-compose
+  - curl -L "https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz" -o /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz
+  - tar xzf /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz -C /tmp/
+  - chmod -R +x /tmp/rancher-compose-v0.12.5/
+  - mv /tmp/rancher-compose-v0.12.5/rancher-compose /usr/bin/rancher-compose
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+build_image:
+  stage: build
+  script:
+    - docker-compose -f docker-compose.build.yml build
+    - docker-compose -f docker-compose.build.yml push
+
+deploy_stack:
+  stage: deploy
+  script:
+    - rancher-compose -f docker-compose.deploy.yml up --force-upgrade -c -d
